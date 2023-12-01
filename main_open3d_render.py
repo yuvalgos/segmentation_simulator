@@ -85,11 +85,11 @@ if __name__ == '__main__':
     cam_pos = cam_1_pos
     cam_frame_rotation = xy_axes_to_frame_rotation(cam_1_xy_axes[0], cam_1_xy_axes[1])
 
-    cam_frame_rotation = np.eye(3)
+    # cam_frame_rotation = np.eye(3)
     # cam_frame_rotation = np.array([[0.7071068, -0.7071068, 0.000], [0.7071068, 0.7071068, 0], [0, 0, 1]]).T # 45deg around Z works
     # cam_frame_rotation = np.array([[0.9396926, 0, 0.3420202], [0, 1, 0], [-0.3420202, 0, 0.9396926]]).T # 20deg around Y
     # cam_frame_rotation = np.array([[1,  0,  0], [0,  0.9396926, -0.3420202], [0,  0.3420202,  0.9396926]]) # 20deg around X
-    cam_pos = np.array([-0.3,0.4,2])
+    # cam_pos = np.array([-0.3,0.4,2])
 
     # extrinsic_matrix = extrinsic_matrix_from_rotation_translatin(cam_frame_rotation, cam_pos)
 

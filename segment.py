@@ -39,12 +39,13 @@ plt.imshow(im)
 
 points_fg = None
 points_labels = None
-points_fg = np.array([[135,135]])
+points_fg = np.array([[110,110]])
 points_labels = np.array([1])
 # show_points(points_fg, points_labels, plt.gca())
 # plt.show()
 
-box = np.array([[100, 75, 190, 160]])
+box = None
+# box = np.array([[100, 75, 190, 160]])
 # show_box(box[0], plt.gca())
 
 # segment:
@@ -61,7 +62,7 @@ for i, (mask, score) in enumerate(zip(masks, scores)):
     plt.imshow(im)
     show_mask(mask, plt.gca())
     show_points(points_fg, points_labels, plt.gca())
-    show_box(box[0], plt.gca())
+    # show_box(box[0], plt.gca())
     plt.title(f"Mask {i+1}, Score: {score:.3f}", fontsize=18)
     plt.axis('off')
     plt.show()
