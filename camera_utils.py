@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 
 
 def homogeneous_to_cartesian(homogeneous):
@@ -48,3 +49,16 @@ def xy_axes_to_frame_rotation(x_axis, y_axis):
     assert np.dot(y_axis, z_axis) < 1e-4
 
     return np.array([x_axis, y_axis, z_axis]).T
+
+
+def get_torch3d_R_T(cam_frame_rotation, cam_pos):
+    """ get extrinsic camera parameters in torch3d conventions from camera frame rotation and position"""
+    # torch3d and mujoco have opposite z and x axes
+    muj2torch = np.array([[-1, 0, 0], [0, 1, 0], [0, 0, -1]])
+
+    # we invert the rotation by transposing the matrix, then move from mujoco to torch3d coordinates
+    R = muj2torch @ cam_frame_rotation.T
+
+    T = - R @ cam_pos
+
+    return torch.tensor(R, dtype=torch.float32), torch.tensor(T, dtype=torch.float32)
