@@ -11,7 +11,9 @@ class CameraSimulator:
         if launch_viewer:
             self.viewer = mj_viewer.launch_passive(self.model, self.data)
 
-        self.model.vis.global_.fovy = fovy
+        self.model.cam_fovy = fovy
+        self.model.vis.global_.fovy = fovy  # probably don't need this line
+
 
         self.renderer = mj.Renderer(self.model, resolution[0], resolution[1])
 

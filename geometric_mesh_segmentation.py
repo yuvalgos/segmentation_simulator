@@ -107,13 +107,5 @@ def get_mesh_segmentation_batch(mesh_path, scale, cameras_parameters: Union[List
 
     images = renderer(mesh)
     masks = (images[..., 3]).unsqueeze(1)
--
+
     return masks
-
-
-def get_mesh_segmentation_single_mesh():
-    pass
-
-
-def get_mesh_segmentation_single_mesh_single_cam():
-    pass
