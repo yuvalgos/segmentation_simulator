@@ -23,11 +23,6 @@ cam_2_znear, cam_2_zfar = cam_1_znear, cam_1_zfar
 
 if __name__ == "__main__":
     cam_1_frame_rotation = xy_axes_to_frame_rotation(cam_1_xy_axes[0], cam_1_xy_axes[1])
-    # cam_1_frame_rotation_y = [[0.8191521, 0.0000000,  0.5735765], [0,  1,  0],[-0.5735765,  0.0000000,  0.8191521]]  # euler Y
-    # cam_1_frame_rotation_x = [[1, 0, 0], [0.0000000,  0.9063078, -0.4226183], [0.0000000,  0.4226183,  0.9063078]]  # euler X
-    # cam_1_frame_rotation = np.matmul(cam_1_frame_rotation_y, cam_1_frame_rotation_x)
-    # cam_1_frame_rotation = np.array(cam_1_frame_rotation)
-    # cam_1_pos = [0.5, -0.2, 3]
 
     R1, T1 = get_torch3d_R_T(cam_1_frame_rotation, cam_1_pos)
     cam_params_1 = CameraParameters(res_x=cam_1_resx, res_y=cam_1_resy, fov=cam_1_fov, R=R1, T=T1,
