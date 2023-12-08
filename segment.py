@@ -56,7 +56,7 @@ masks, scores, logits = predictor.predict(
     multimask_output=True,
 )
 
-# plot image and masks:
+# plot image and mask_pose1:
 for i, (mask, score) in enumerate(zip(masks, scores)):
     plt.figure(figsize=(10,10))
     plt.imshow(im)
@@ -67,8 +67,8 @@ for i, (mask, score) in enumerate(zip(masks, scores)):
     plt.axis('off')
     plt.show()
 
-# plot all masks:
-# for mask in masks:
+# plot all mask_pose1:
+# for mask in mask_pose1:
 #     m = mask['segmentation']
 #     plt.imshow(m)
 #     plt.show()

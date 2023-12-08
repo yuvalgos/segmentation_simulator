@@ -1,4 +1,6 @@
+import numpy as np
 import torch
+from scipy.spatial.transform import Rotation
 from pytorch3d.structures import Meshes
 from pytorch3d.io import load_obj
 from pytorch3d.renderer import PerspectiveCameras, FoVPerspectiveCameras
@@ -48,13 +50,33 @@ class CameraParameters:
         return res_x, res_y, fov, R, T, z_near, z_far, aspect_ratio
 
 
-def load_mesh(mesh_paths, scale, device) -> Meshes:
+def transform_mesh(verts, position, orientation):
+    """
+    transform mesh by position and orientation
+    :param verts: mesh vertices
+    :param position: x, y, z position of the object in the world
+    :param orientation: euler orientation of the object in the world, as x, y, z angles
+    :return: transformed mesh vertices
+    """
+    # account for the different coordinate systems between torch3d and mujoco. The angles are used in mujoco normally.
+
+    euler_new = np.array([orientation[2], -orientation[1], -orientation[0]])
+    R = Rotation.from_euler('xyz', euler_new, degrees=False).as_matrix()
+    R = torch.Tensor(R)
+    verts_transofrmed = R @ verts.T
+
+    pos_torch = torch.Tensor([-position[0], -position[1], position[2]])
+    return verts_transofrmed.T + pos_torch
+
+
+def load_mesh(mesh_paths, scale, position, oreintation, device) -> Meshes:
     """
     load mesh from file to torch mesh object.
     """
     verts, faces, aux = load_obj(mesh_paths)
     # scale the mesh:
     verts = verts * scale
+    verts = transform_mesh(verts, position, oreintation)
     verts_rgb = torch.ones(verts.shape[0], 3, dtype=torch.float32).unsqueeze(0).to(device)
     mesh = Meshes(
         verts=verts.unsqueeze(0).to(device),
@@ -81,17 +103,22 @@ def get_cameras(cameras_parameters: Union[List[CameraParameters], CameraParamete
     return cameras, res_x, res_y
 
 
-def get_mesh_segmentation_batch(mesh_path, scale, cameras_parameters: Union[List[CameraParameters], CameraParameters],
-                                device='auto'):
+def get_mesh_segmentation_batch(mesh_path, cameras_parameters: Union[List[CameraParameters], CameraParameters], scale=1,
+                                position=[0,0,0], orientation=[0,0,0], device='auto'):
     """
-    * if a single mesh path or a single cam is provided it is used for all the batch
 
-    :return:
+    :param mesh_path: path to the mesh, one mesh per batch. same for position, orientation and scale
+    :param cameras_parameters: list of camera parameters objects for different cameras. can pass only one camera.
+    :param scale: mesh scale, applied to the vertices
+    :param position: x, y, z position of the object in the world
+    :param orientation: euler orientation of the object in the world, as x, y, z angles
+    :param device: torch evice
+    :return: batch of segmentation mask_pose1
     """
 
     n_cameras = 1 if isinstance(cameras_parameters, CameraParameters) else len(cameras_parameters)
 
-    mesh = load_mesh(mesh_path, scale, device)
+    mesh = load_mesh(mesh_path, scale, position, orientation, device)
     cameras, res_x, res_y = get_cameras(cameras_parameters, device)
     if n_cameras != 1:
         mesh = mesh.extend(n_cameras)

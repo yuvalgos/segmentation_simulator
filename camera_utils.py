@@ -71,7 +71,7 @@ def get_torch3d_R_T(cam_frame_rotation, cam_pos):
     # Trust me, I had some bad time figuring this out.
     r = Rotation.from_matrix(cam_frame_rotation)
     euler = r.as_euler('xyz', degrees=True)
-    euler_new = np.array([euler[2], -euler[1], euler[0]])
+    euler_new = np.array([euler[2] + 180, -euler[1], euler[0]])
     cam_frame_rotation = Rotation.from_euler('zyx', euler_new, degrees=True).as_matrix()
     R = muj2torch @ cam_frame_rotation.T
 

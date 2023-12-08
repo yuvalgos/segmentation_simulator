@@ -53,7 +53,7 @@ def render_mask(img_size, R, T, fov_y, aspect_ratio=1.0, device='auto'):
     images = renderer(mesh) # B x 480 x 640 x 4
     masks = (images[...,3]).unsqueeze(1) # B x 1 x 480 x 640
     im = images[..., :3]
-    # masks = F.interpolate(masks, scale_factor=(0.5)) # downsample to B x 1 x 240 x 320
+    # mask_pose1 = F.interpolate(mask_pose1, scale_factor=(0.5)) # downsample to B x 1 x 240 x 320
 
     return masks
 
