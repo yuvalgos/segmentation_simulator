@@ -8,29 +8,31 @@ from utils import plot_segmentation_mask
 
 # parameters:
 mesh1_path = "./data/meshes/mug.obj"
+scale = 0.02
+table_height = 1.0
 
-cam_1_pos = [2, -2, 3]
+cam_1_pos = [0.5, -0.8, 1.2]
 cam_1_xy_axes = [[0.685, 0.728, 0.000], [-0.487, 0.458, 0.743]]
 cam_1_resx, cam_1_resy = 200, 200
 cam_1_fov = 60
 cam_1_znear, cam_1_zfar = 0.1, 100
 
-cam_2_pos = np.array([-0.3,0.4,2])
+cam_2_pos = np.array([-0.1,0.15,0.9])
 cam_2_frame_rotation = np.array([[0.7071068, -0.7071068, 0.000], [0.7071068, 0.7071068, 0], [0, 0, 1]]).T # 45deg around Z
 cam_2_resx, cam_2_resy = 200, 200
 cam_2_fov = 45
 cam_2_znear, cam_2_zfar = cam_1_znear, cam_1_zfar
 
-cam_3_pos = [1, -1, 1.5]
+cam_3_pos = [1, -1, 1.9]
 cam_3_xy_axes = [[0.685, 0.728, 0.000], [-0.487, 0.458, 0.743]]
 cam_3_resx, cam_3_resy = 200, 200
-cam_3_fov = 60
+cam_3_fov = 45
 cam_3_znear, cam_3_zfar = 0.1, 100
 
-obj_position_1 = [0.2, 0.4, 0.6]
+obj_position_1 = [0.2, 0.3, 0.08 + table_height]
 obj_orientation_1 = [2.1, 0, 1.57]
 
-obj_position_2 = [-0.2, -0.1, 0.5]
+obj_position_2 = [-0.2, -0.1, 0.1 + table_height]
 obj_orientation_2 = [0.7, -0.7, 0.7]
 
 
@@ -44,7 +46,7 @@ def test_2_cameras_base_pose():
     cam_params_2 = CameraParameters(res_x=cam_2_resx, res_y=cam_2_resy, fov=cam_2_fov, R=R2, T=T2,
                                     z_near=cam_1_znear, z_far=cam_1_zfar)
 
-    masks = get_mesh_segmentation_batch(mesh_path=mesh1_path, scale=0.05,
+    masks = get_mesh_segmentation_batch(mesh_path=mesh1_path, scale=scale,
                                         cameras_parameters=[cam_params_1, cam_params_2], device='cpu')
 
 
@@ -73,7 +75,7 @@ def test_1_camera_2_poses():
     cam_3_sim.set_manipulated_object_orientation_euler(obj_orientation_1)
     cam_3_im_pose1 = cam_3_sim.render(rotation_matrix=cam_3_frame_rotation, position=cam_3_pos)
 
-    mask_pose1 = get_mesh_segmentation_batch(mesh_path=mesh1_path, scale=0.05, cameras_parameters=cam_params_3,
+    mask_pose1 = get_mesh_segmentation_batch(mesh_path=mesh1_path, scale=scale, cameras_parameters=cam_params_3,
                                              position=obj_position_1, orientation=obj_orientation_1, device='cpu')
 
     plot_segmentation_mask(cam_3_im_pose1, mask_pose1[0])
@@ -82,7 +84,7 @@ def test_1_camera_2_poses():
     cam_3_sim.set_manipulated_object_orientation_euler(obj_orientation_2)
     cam_3_im_pose2 = cam_3_sim.render(rotation_matrix=cam_3_frame_rotation, position=cam_3_pos)
 
-    mask_pose2 = get_mesh_segmentation_batch(mesh_path=mesh1_path, scale=0.05, cameras_parameters=cam_params_3,
+    mask_pose2 = get_mesh_segmentation_batch(mesh_path=mesh1_path, scale=scale, cameras_parameters=cam_params_3,
                                              position=obj_position_2, orientation=obj_orientation_2, device='cpu')
 
     plot_segmentation_mask(cam_3_im_pose2, mask_pose2[0])
