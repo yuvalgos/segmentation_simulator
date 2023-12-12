@@ -1,9 +1,11 @@
 import numpy as np
+import torch
 from camera_simulator import CameraSimulator
 from camera_utils import xy_axes_to_frame_rotation, get_torch3d_R_T
 from matplotlib import pyplot as plt
 from sam_segmentation import SAMSegmentation
-from utils import plot_segmentation_mask, plot_grid_segmentation_masks
+from utils import plot_segmentation_mask, plot_grid_segmentation_masks, masks_intersection_batch,\
+    compute_masks_IOU_batch
 from geometric_mesh_segmentation import CameraParameters, get_mesh_segmentation_batch
 
 mesh = "./data/meshes/mug.obj"
@@ -70,5 +72,27 @@ if __name__ == "__main__":
     sam = SAMSegmentation()
     mask_sam, score = sam.segment_image_center(im_actual, best_out_of_3=True)
     plot_segmentation_mask(im_actual, mask_sam, mask_alpha=0.95, color=[30, 255, 30])
+    iou = compute_masks_IOU_batch(torch.from_numpy(mask_sam).unsqueeze(0), torch.cat(masks))
 
-    # TODO: plot masks intersections and IOU. implement the methods.
+    # plot intersection images:
+    masks_geometric = torch.cat(masks, dim=0)
+    masks_sam = torch.from_numpy(mask_sam).unsqueeze(0)
+    intersection = masks_intersection_batch(masks_geometric, masks_sam)
+    fig, axs = plt.subplots(1, 4, figsize=(20, 5))
+    for im, ax, iou_score in zip(intersection, axs, iou):
+        ax.imshow(im)
+        ax.axis('off')
+        ax.set_title(f"IOU: {iou_score.item():.2f}")
+        ax.title.set_size(30)
+    plt.show()
+
+    # use softmax to get pose distribution, with high low temperature:
+    pose_distribution = torch.softmax(iou * 3, dim=0).numpy().squeeze()
+    # plot pose distribution wide:
+    plt.figure(figsize=(20, 5))
+    plt.bar(range(len(pose_distribution)), pose_distribution)
+    plt.xticks(range(len(pose_distribution)), ["Pose 1", "Pose 2", "Pose 3", "Pose 4"])
+    plt.title("Pose distribution", fontsize=30)
+    plt.xticks(fontsize=20)
+    plt.show()
+
