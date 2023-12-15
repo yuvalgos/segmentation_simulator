@@ -8,6 +8,7 @@ from pytorch3d.renderer.mesh import Textures, MeshRenderer, MeshRasterizer, Soft
 from pytorch3d.renderer.mesh.shader import SoftPhongShader
 from pytorch3d.renderer.mesh.rasterizer import RasterizationSettings
 from pytorch3d.renderer.mesh.textures import TexturesVertex
+from pytorch3d.transforms import euler_angles_to_matrix
 from torch.nn import functional as F
 from dataclasses import dataclass
 from typing import List, Union
@@ -59,10 +60,13 @@ def transform_mesh(verts, position, orientation):
     :return: transformed mesh vertices
     """
     # account for the different coordinate systems between torch3d and mujoco. The angles are used in mujoco normally.
+    euler_new = torch.Tensor([orientation[2], -orientation[1], -orientation[0]])
 
-    euler_new = np.array([orientation[2], -orientation[1], -orientation[0]])
-    R = Rotation.from_euler('xyz', euler_new, degrees=False).as_matrix()
-    R = torch.Tensor(R)
+    # R = Rotation.from_euler('xyz', euler_new, degrees=False).as_matrix()
+    # R = torch.Tensor(R)
+    # equivalent but only with torch:
+    R = euler_angles_to_matrix(torch.flip(euler_new, [0]), "ZYX")
+
     verts_transofrmed = R @ verts.T
 
     pos_torch = torch.Tensor([-position[0], -position[1], position[2]])
