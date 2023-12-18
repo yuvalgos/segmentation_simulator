@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from scipy.spatial.transform import Rotation
@@ -71,7 +72,7 @@ def transform_mesh(verts, position, orientation):
     verts_transofrmed = R @ verts.T
 
     # pos_torch = torch.Tensor([-position[0], -position[1], position[2]])
-    pos_torch = torch.stack([position[0], position[1], position[2]], dim=0)
+    pos_torch = torch.stack([-position[0], -position[1], position[2]], dim=0)
     return verts_transofrmed.T + pos_torch
 
 
@@ -110,7 +111,8 @@ def get_cameras(cameras_parameters: Union[List[CameraParameters], CameraParamete
 
 
 def get_mesh_segmentation_batch(mesh_path, cameras_parameters: Union[List[CameraParameters], CameraParameters], scale=1,
-                                position=[0,0,0], orientation=[0,0,0], device='auto'):
+                                position=torch.Tensor([0, 0, 0]), orientation=torch.Tensor([0, 0, 0]),
+                                return_depth_map=False, device='auto'):
     """
 
     :param mesh_path: path to the mesh, one mesh per batch. same for position, orientation and scale
@@ -135,14 +137,17 @@ def get_mesh_segmentation_batch(mesh_path, cameras_parameters: Union[List[Camera
 
     sigma = 0
     raster_settings = RasterizationSettings(image_size=(int(res_x[0]), int(res_y[0])),
-                                            blur_radius=np.log(1. / 1e-4 - 1.)*sigma, faces_per_pixel=10)
-    renderer = MeshRenderer(rasterizer=MeshRasterizer(cameras=cameras, raster_settings=raster_settings),
-                            shader=SoftSilhouetteShader())
-    #
-    # renderer = MeshRenderer(rasterizer=MeshRasterizer(cameras=cameras, raster_settings=raster_settings),
-    #                         shader=SoftPhongShader(device=device, cameras=cameras))
+                                            blur_radius=np.log(1. / 1e-4 - 1.)*sigma, faces_per_pixel=1)
+    rasterizer = MeshRasterizer(cameras=cameras, raster_settings=raster_settings)
+    # renderer = MeshRenderer(rasterizer=rasterizer,
+    #                         shader=SoftSilhouetteShader())
 
-    images = renderer(mesh)
-    masks = (images[..., 3]).unsqueeze(1)
+    fragment_depth = rasterizer(mesh).zbuf
+    fragment_depth = fragment_depth[..., 0]  # if multiple faces per pixel, take the closest one to the camera
+
+    masks = fragment_depth != -1
+
+    if return_depth_map:
+        return masks, fragment_depth
 
     return masks

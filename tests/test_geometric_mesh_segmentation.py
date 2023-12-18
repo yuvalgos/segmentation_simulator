@@ -1,3 +1,4 @@
+import torch
 from geometric_mesh_segmentation import CameraParameters, get_mesh_segmentation_batch
 from camera_utils import xy_axes_to_frame_rotation, get_torch3d_R_T
 import matplotlib.pyplot as plt
@@ -29,11 +30,11 @@ cam_3_resx, cam_3_resy = 200, 200
 cam_3_fov = 45
 cam_3_znear, cam_3_zfar = 0.1, 100
 
-obj_position_1 = [0.2, 0.3, 0.08 + table_height]
-obj_orientation_1 = [2.1, 0, 1.57]
+obj_position_1 = torch.Tensor([0.2, 0.3, 0.08 + table_height])
+obj_orientation_1 = torch.Tensor([2.1, 0, 1.57])
 
-obj_position_2 = [-0.2, -0.1, 0.1 + table_height]
-obj_orientation_2 = [0.7, -0.7, 0.7]
+obj_position_2 = torch.Tensor([-0.2, -0.1, 0.1 + table_height])
+obj_orientation_2 = torch.Tensor([0.7, -0.7, 0.7])
 
 
 def test_2_cameras_base_pose():

@@ -36,8 +36,9 @@ def masks_intersection_batch(mask1, mask2, mask1_color=np.array([255, 30, 30]), 
     mask1 = mask1 > 0
     mask2 = mask2 > 0
 
-    mask_1_colored = mask1.repeat(1, 3, 1, 1)
-    mask_2_colored = mask2.repeat(1, 3, 1, 1)
+    # add color dimension and repeat mask in that dimention:
+    mask_1_colored = mask1.unsqueeze(1).repeat(1, 3, 1, 1)
+    mask_2_colored = mask2.unsqueeze(1).repeat(1, 3, 1, 1)
 
     mask_1_colored = mask_1_colored * torch.Tensor(mask1_color).reshape(1, 3, 1, 1)
     mask_2_colored = mask_2_colored * torch.Tensor(mask2_color).reshape(1, 3, 1, 1)
