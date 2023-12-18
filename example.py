@@ -55,6 +55,8 @@ if __name__ == "__main__":
     # plot four geometric segmentations (predicted segmentation):
     masks = []
     for obj_position, obj_orientation in zip(obj_positions, obj_orientations):
+        obj_position = torch.Tensor(obj_position)
+        obj_orientation = torch.Tensor(obj_orientation)
         # can't really batch here since pose is different
         R, T = get_torch3d_R_T(cam_frame_R, cam_pos)
         cam_params = CameraParameters(res_x=cam_resx, res_y=cam_resy, fov=cam_fov, R=R, T=T,
@@ -73,6 +75,8 @@ if __name__ == "__main__":
     mask_sam, score = sam.segment_image_center(im_actual, best_out_of_3=True)
     plot_segmentation_mask(im_actual, mask_sam, mask_alpha=0.95, color=[30, 255, 30])
     iou = compute_masks_IOU_batch(torch.from_numpy(mask_sam).unsqueeze(0), torch.cat(masks))
+    # save sam mask:
+    np.save("./sam_mask.npy", mask_sam)
 
     # plot intersection images:
     masks_geometric = torch.cat(masks, dim=0)

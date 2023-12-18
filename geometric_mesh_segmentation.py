@@ -60,7 +60,8 @@ def transform_mesh(verts, position, orientation):
     :return: transformed mesh vertices
     """
     # account for the different coordinate systems between torch3d and mujoco. The angles are used in mujoco normally.
-    euler_new = torch.Tensor([orientation[2], -orientation[1], -orientation[0]])
+    # we use torch stack to keep propagating gradients if necessary
+    euler_new = torch.stack([orientation[2], -orientation[1], -orientation[0]], dim=0)
 
     # R = Rotation.from_euler('xyz', euler_new, degrees=False).as_matrix()
     # R = torch.Tensor(R)
@@ -69,7 +70,8 @@ def transform_mesh(verts, position, orientation):
 
     verts_transofrmed = R @ verts.T
 
-    pos_torch = torch.Tensor([-position[0], -position[1], position[2]])
+    # pos_torch = torch.Tensor([-position[0], -position[1], position[2]])
+    pos_torch = torch.stack([position[0], position[1], position[2]], dim=0)
     return verts_transofrmed.T + pos_torch
 
 
@@ -131,10 +133,14 @@ def get_mesh_segmentation_batch(mesh_path, cameras_parameters: Union[List[Camera
     assert torch.all(res_x == res_x[0]), "all images in batch must have the same resolution"
     assert torch.all(res_y == res_y[0]), "all images in batch must have the same resolution"
 
-    raster_settings = RasterizationSettings(image_size=(int(res_x[0]), int(res_y[0])), blur_radius=0.0,
-                                            faces_per_pixel=1)
+    sigma = 0
+    raster_settings = RasterizationSettings(image_size=(int(res_x[0]), int(res_y[0])),
+                                            blur_radius=np.log(1. / 1e-4 - 1.)*sigma, faces_per_pixel=10)
     renderer = MeshRenderer(rasterizer=MeshRasterizer(cameras=cameras, raster_settings=raster_settings),
-                            shader=SoftPhongShader(device=device, cameras=cameras))
+                            shader=SoftSilhouetteShader())
+    #
+    # renderer = MeshRenderer(rasterizer=MeshRasterizer(cameras=cameras, raster_settings=raster_settings),
+    #                         shader=SoftPhongShader(device=device, cameras=cameras))
 
     images = renderer(mesh)
     masks = (images[..., 3]).unsqueeze(1)
