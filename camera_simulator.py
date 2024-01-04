@@ -26,6 +26,8 @@ class CameraSimulator:
         # self.manipulated_object.zero_velocities()
 
         self.renderer = mj.Renderer(self.model, resolution[0], resolution[1])
+        self.depth_renderer = mj.Renderer(self.model, resolution[0], resolution[1])
+        self.depth_renderer.enable_depth_rendering()
 
     def set_manipulated_object_position(self, position):
         self.manipulated_object.set_position(position)
@@ -39,6 +41,13 @@ class CameraSimulator:
         self.data.cam_xmat = rotation_matrix.flatten()
         self.renderer.update_scene(self.data, camera=0)
         return self.renderer.render()
+
+    def render_depth(self, rotation_matrix, position):
+        mj.mj_forward(self.model, self.data)
+        self.data.cam_xpos = position
+        self.data.cam_xmat = rotation_matrix.flatten()
+        self.depth_renderer.update_scene(self.data, camera=0)
+        return self.depth_renderer.render()
 
     def step_simulation(self):
         step_start = time.time()
