@@ -6,6 +6,7 @@ import numpy as np
 
 class SAMSegmentation:
     def __init__(self, device='auto'):
+        self.download_weights_if_needed()
         sam = sam_model_registry["vit_b"](checkpoint="models/sam_vit_b_01ec64.pth")
         self.predictor = SamPredictor(sam)
 
@@ -27,7 +28,16 @@ class SAMSegmentation:
             best_mask = np.argmax(scores)
             return masks[best_mask], scores[best_mask]
 
-        # TODO: create a file to test this. remove above code from this file, it's still in segment.py
-        # TODO: the test file should run simulation and be base for example, call it example.py
+    def download_weights_if_needed(self):
+        import os
+        import urllib.request
+        if os.path.exists("./models/sam_vit_b_01ec64.pth"):
+            return
 
-        # TODO: batched images in the end: https://github.com/facebookresearch/segment-anything/blob/main/notebooks/predictor_example.ipynb
+        print("Downloading SAM weights...")
+        # make models dir if needed:
+        os.makedirs("./models", exist_ok=True)
+        url = "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth"
+        # download, original file name but to models dir:
+        urllib.request.urlretrieve(url, "./models/sam_vit_b_01ec64.pth")
+        print("Done.")
