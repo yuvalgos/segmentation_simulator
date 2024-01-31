@@ -65,6 +65,9 @@ if __name__ == "__main__":
                                            position=obj_position, orientation=obj_orientation, device='cpu')
         masks.append(mask)
     plot_grid_segmentation_masks(images, masks, (1, 4), mask_alpha=0.95)
+    #plot the mask seperatly as well:
+    dummy_image = np.zeros([cam_resy, cam_resx, 3])
+    plot_grid_segmentation_masks(np.array([dummy_image]*4), masks, mask_alpha=0.95, color=[255, 30, 30])
 
     # use sam to segment actual image and show it
     cam_sim.set_manipulated_object_position(obj_position_actual)
@@ -74,6 +77,7 @@ if __name__ == "__main__":
     sam = SAMSegmentation()
     mask_sam, score = sam.segment_image_center(im_actual, best_out_of_3=True)
     plot_segmentation_mask(im_actual, mask_sam, mask_alpha=0.95, color=[30, 255, 30])
+    plot_segmentation_mask(dummy_image, mask_sam, mask_alpha=0.95, color=[30, 255, 30])
     iou = compute_masks_IOU_batch(torch.from_numpy(mask_sam).unsqueeze(0), torch.cat(masks))
     # save sam mask:
     np.save("./sam_mask.npy", mask_sam)
