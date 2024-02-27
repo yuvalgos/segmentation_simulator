@@ -1,2 +1,8 @@
 # created by virtualenv automatically
-*
+# hard coded
+\wandb*
+*\.idea
+/data/mug_segment.png
+ref_depth.pt
+ref_mask.pt
+sam_mask.npy
